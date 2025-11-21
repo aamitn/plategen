@@ -1,0 +1,1 @@
+pyinstaller --noconfirm --onefile --windowed --icon=plategen_icon.ico --name=plategen app.py --collect-all requests
