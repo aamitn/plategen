@@ -1602,6 +1602,8 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle('Fusion')
 
+    # app.addLibraryPath(os.path.join(os.path.dirname(sys.argv[0]), "plugins"))
+
     # Ensure app icon exists and set it for the application and main window
     try:
         icon_path = ensure_app_icon()
