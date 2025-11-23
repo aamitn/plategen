@@ -1,3 +1,4 @@
+# UPS RATING PLATE GENERATOR
 import sys
 import os
 from array import array

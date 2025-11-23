@@ -1,3 +1,4 @@
+# LAUNCHER APP
 import sys
 import os
 import subprocess
@@ -134,6 +135,7 @@ class LauncherWindow(QMainWindow):
                 ('Battery Charger (BCH)', 'app_bch.py'),
                 ('DB Rating Plate (DB)', 'app_db.py'),
                 ('UPS Rating Plate (UPS)', 'app_ups.py'),
+                ('Nameplate', 'app_np.py'),
             ]
         self.apps = [(label, os.path.join(here, fname)) for label, fname in apps]
 

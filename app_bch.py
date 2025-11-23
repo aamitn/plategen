@@ -1,3 +1,4 @@
+# CHARGER RATING PLATE GENERATOR
 import win32com.client
 import pythoncom
 from array import array

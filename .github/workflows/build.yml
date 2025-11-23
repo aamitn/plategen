@@ -48,16 +48,21 @@ jobs:
           pyinstaller --clean --noconfirm --onefile --windowed --icon=plategen_icon.ico --name=app_db app_db.py --add-data "plategen_icon.ico;." --collect-all requests
           pyinstaller --clean --noconfirm --onefile --windowed --icon=plategen_icon.ico --name=app_ups app_ups.py --add-data "plategen_icon.ico;." --collect-all requests
           pyinstaller --clean --noconfirm --onefile --windowed --icon=plategen_icon.ico --name=app_bch app_bch.py --add-data "plategen_icon.ico;." --collect-all requests
-          
+          pyinstaller --clean --noconfirm --onefile --windowed --icon=plategen_icon.ico --name=app_bch app_np.py --add-data "plategen_icon.ico;." --collect-all requests          
+          pyinstaller --clean --noconfirm --onefile --windowed --icon=plategen_icon.ico --name=app_bch app_np_db_schema.py --add-data "plategen_icon.ico;." --collect-all requests          
+
           mkdir dist_release
           
           copy dist\plategen.exe dist_release\
           copy dist\app_db.exe dist_release\
           copy dist\app_ups.exe dist_release\
           copy dist\app_bch.exe dist_release\
+          copy dist\app_np.exe dist_release\
+          copy dist\app_np_db_schema.exe dist_release\
           copy appver.txt dist_release\
+          copy db_export\nameplates.db dist_release\
           
-          # Create ZIP of dist_release
+          # Create ZIP of dist_release contents
           powershell -Command "Compress-Archive -Path dist_release\* -DestinationPath dist_release.zip -Force"
 
       # -------------------------------
@@ -67,16 +72,13 @@ jobs:
         run: choco install innosetup --no-progress -y
 
       # -------------------------------
-      # 6. Build installer (.exe) and add to ZIP
+      # 6. Build installer (.exe) separately
       # -------------------------------
       - name: 📦 Build installer (.exe)
         shell: cmd
         run: |
           "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "installer\iscript.iss"
-          copy "installer\output\PlateGeneratorSetup.exe" "dist_release\PlateGeneratorSetup.exe"
-          
-          # Add installer to zip
-          powershell -Command "Compress-Archive -Path 'dist_release\PlateGeneratorSetup.exe' -Update -DestinationPath dist_release.zip"
+          copy "installer\output\PlateGeneratorSetup.exe" "PlateGeneratorSetup.exe"
 
       # -------------------------------
       # 7. Determine release tag and name
@@ -103,6 +105,8 @@ jobs:
           name: ${{ steps.vars.outputs.release_name }}
           draft: false
           prerelease: ${{ steps.vars.outputs.tag == 'Snapshot' }}
-          files: dist_release.zip
+          files: |
+            dist_release.zip
+            PlateGeneratorSetup.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

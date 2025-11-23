@@ -1,4 +1,7 @@
 altgraph==0.17.5
+charset-normalizer==3.4.4
+et_xmlfile==2.0.0
+openpyxl==3.1.5
 packaging==25.0
 pefile==2023.2.7
 pillow==12.0.0
@@ -10,3 +13,4 @@ PyQt6-Qt6==6.10.0
 PyQt6_sip==13.10.2
 pywin32==311
 pywin32-ctypes==0.2.3
+reportlab==4.4.5

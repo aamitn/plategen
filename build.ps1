@@ -44,6 +44,8 @@ pyinstaller --clean --noconfirm --onefile --windowed --icon=plategen_icon.ico --
 pyinstaller --clean --noconfirm --onefile --windowed --icon=plategen_icon.ico --name=app_db app_db.py --add-data "plategen_icon.ico;." --collect-all requests
 pyinstaller --clean --noconfirm --onefile --windowed --icon=plategen_icon.ico --name=app_ups app_ups.py --add-data "plategen_icon.ico;." --collect-all requests
 pyinstaller --clean --noconfirm --onefile --windowed --icon=plategen_icon.ico --name=app_bch app_bch.py --add-data "plategen_icon.ico;." --collect-all requests
+pyinstaller --clean --noconfirm --onefile --windowed --icon=plategen_icon.ico --name=app_np app_np.py --add-data "plategen_icon.ico;." --collect-all requests
+pyinstaller --clean --noconfirm --onefile --windowed --icon=plategen_icon.ico --name=app_np_db_schema app_np_db_schema.py --add-data "plategen_icon.ico;." --collect-all requests
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host PyInstaller build FAILED!

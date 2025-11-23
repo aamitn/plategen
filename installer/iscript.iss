@@ -37,6 +37,9 @@ Source: "..\liveline_logo.dwg"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\plategen_icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 ; appver file
 Source: "..\appver.txt"; DestDir: "{app}"; Flags: ignoreversion
+; sqlite dbfile
+Source: "..\db_export\nameplates.db"; DestDir: "{app}"; Flags: ignoreversion
+
 
 [Icons]
 ; Start Menu shortcut

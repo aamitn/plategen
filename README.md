@@ -1,106 +1,208 @@
-<img src="./plategen_icon.ico" align="left">
+<img src="./plategen_icon.ico" align="left" width="75">
 
-# UPS Spec & Manual Generator
+# Plategen ⭐: Industrial Plate Generation Suite
 
-A powerful, **PyQt6** based desktop application that automates the generation of detailed **Technical Specifications** for Uninterruptible Power Supply (UPS) and Bypass Panel Systems. Leveraging the `docxtpl` engine, this utility rapidly compiles complex configuration, rating, I/O, battery, and environmental data into a professional, ready-to-use `.docx` specification document based on a customizable template.
+Plategen is a **modular Python desktop application** designed for automated generation of technical rating plates and nameplates for heavy industrial electrical equipment, including UPS, BCH, AC/DC DB panels. It provides **direct integration with AutoCAD via COM automation**, ensuring high precision and eliminating manual drafting errors in critical manufacturing documentation.
+
 
 Built for teams at **Liveline Electronics**.
 
-[![Latest Release](https://img.shields.io/github/v/release/aamitn/manualgen?style=for-the-badge&logo=github&label=Latest%20Version)](https://github.com/aamitn/manualgen/releases)
+[![Latest Release](https://img.shields.io/github/v/release/aamitn/plategen?style=for-the-badge&logo=github&label=Latest%20Version)](https://github.com/aamitn/plategen/releases)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 
-pyinstaller --noconfirm --onefile --windowed --icon=plategen_icon.ico --name=plategen app.py --collect-all requests
+---
+
+## 🌟 Features Overview
+
+| Feature | Description | Key Technology |
+|---------|------------|----------------|
+| 🎨 Multi-plate Generator | Decoupled PyQt6 UIs for handling distinct domain models (UPS, BCH, DB, Nameplate Lists). | PyQt6 |
+| 🖼️ AutoCAD COM Automation | Direct manipulation of AutoCAD Object Model via `win32com.client` (Windows Only). | Python COM (`pywin32`) |
+| 📊 Structured Export | Generate complex, styled manufacturing reports and Bills of Materials (BOMs). | `openpyxl`, `reportlab` |
+| 🔋 Domain Configuration | Structured data entry and validation for electrical parameters (e.g., kVA/PF calculation, circuit configs). | PyQt6 Validation, Internal Calculation Logic |
+| 🗂️ Launcher Hub | Central process managing lifecycle, AutoCAD detection, and update sync. | PyQt6, `psutil`, `subprocess` |
 
 ---
 
-## ✨ Key Features
+## 🚀 Getting Started
 
-| Icon | Feature | Description |
-| :---: | :--- | :--- |
-| 📄 | **Template-Driven Generation** | Creates complex technical documents (`.docx`) from a single `template.docx` file using the `docxtpl` library. |
-| 🧮 | **Dynamic Calculations** | Automatically computes key parameters like **Real Rating (kVA)** and **Battery Bus Voltage** based on input data. |
-| 📊 | **Comprehensive Data Input** | Organized into **four thematic tabs** (General, I/O & Battery, Lists, Environment) to cover every required specification detail. |
-| ➕➖ | **List Editor** | Intuitive list management for complex sections like **Protections**, **Metering Points**, **Audio Alarms**, and **Potential-Free Contacts**. |
-| 💾 | **PDF Conversion** | One-click conversion of the last generated `.docx` file into a `.pdf` (requires the `docx2pdf` dependency). |
-| 🔄 | **Version Check** | Built-in "About" dialog fetches and displays the latest available GitHub release version in real-time. |
-| 📁 | **Auto-Open** | Optional setting to automatically open the generated `.docx` or `.pdf` file upon creation. |
+### System Prerequisites
+- **OS:** Windows 10/11 (Required for AutoCAD COM Interoperability)  
+- **Python:** 3.8+  
+- **CAD Software:** AutoCAD installation (Required for plate drawing)  
 
----
+### Dependencies
+Managed via `requirements.txt`:
+- `PyQt6`
+- `pywin32` (COM integration)
+- `openpyxl`
+- `reportlab`
+- `psutil` (AutoCAD process management)
 
-## ⚙️ Dependencies & Installation (Development)
+### Installation & Execution
+```bash
+# Clone the repository
+git clone https://github.com/your-repo/plategen.git
+cd plategen
 
-To set up the development environment and run the application:
+# Install dependencies
+pip install -r requirements.txt
 
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/aamitn/manualgen.git](https://github.com/aamitn/manualgen.git)
-    cd manualgen # Replace with your actual project directory name if different
-    ```
-
-2.  **Create and activate a virtual environment:**
-    ```bash
-    python -m venv .venv
-    .\.venv\Scripts\activate.bat 
-    # OR (Linux/Mac)
-    source ./.venv/bin/activate
-    ```
-
-3.  **Install Python Libraries:**
-    ```bash
-    pip install docxtpl PyQt6 requests
-    # OPTIONAL: Install the PDF conversion dependency
-    pip install docx2pdf
-    ```
-
-4.  **Template Requirement:** Ensure a file named **`template.docx`** is present in the application's root directory. This template must contain Jinja2 placeholders (e.g., `{{ full_spec_title }}`) corresponding to the context variables defined in `_generate_docx_file`.
-
-5.  **Run the application:**
-    ```bash
-    python app.py
-    ```
-
----
-
-## 🚀 Build Executable (PyInstaller)
-
-To create a standalone executable for deployment:
-
-1.  **Install PyInstaller:**
-    ```bash
-    pip install pyinstaller
-    ```
-
-2.  **Run the build command with custom naming:** Use the `--name` flag to specify the output filename, as discussed earlier.
-    ```bash
-    pyinstaller --noconfirm --onefile --windowed --icon=icon.ico --name=UPSManualGen app.py
-    ```
-    The built executable, **`UPSManualGen.exe`**, will be located in the **`dist/`** folder.
-
----
-
-## 💻 Technical Highlights
-
-### 1. Specification Numbering
-
-The program automatically constructs a formal specification number based on the Job Number (`job_no`), OP Number (`op_no`), and the current year, ensuring compliance with internal document standards:
-
-$$
-\text{SPEC-No} = \text{TEC SPEC-}\{\text{job\_no}\}-\text{OP}\{\text{op\_no}\}-\{\text{YY}\}\text{UPS}3
-$$
-
-*(Where YY is the last two digits of the current year).*
-
-### 2. Bypass Line Equipment Mapping
-
-A robust dictionary handles the conversion between user-friendly equipment descriptions displayed in the ComboBox and the internal keys used in the template rendering logic. 
-
-```python
-ble_options_map = {
-    "Isolation transformer with servo Stabilizer.": "stabilizer_iso",
-    # ... more options
-    "Integrated Power Distribution Unit (PDU)...": "integrated_pdu"
-}
+# Run the Launcher
+python app.py
 ```
 
-### 3. Asynchronous Version Checking
-The GitHub API call to fetch the latest release tag is executed in a separate QThread (GithubVersionWorker) to prevent the main GUI from freezing, maintaining a smooth user experience.
+---
+
+## 📐 Application Architecture
+
+Plategen follows a **Micro-Application Architecture** with a central launcher orchestrating multiple specialized generator modules.
+
+### System Architecture & External Interfaces
+```mermaid
+graph TD
+    subgraph Core Applications
+        A[app.py - Launcher]
+        B[app_bch.py - BCH Plate]
+        C[app_ups.py - UPS Plate]
+        D[app_db.py - DB Plate]
+        E[app_np.py - Nameplate List]
+    end
+
+    subgraph External Services
+        F[AutoCAD COM Object Model (IUnknown)]
+        G[nameplates.db - SQLite]
+        H[app_np_db_schema.py - DB Creator/Initializer]
+    end
+
+    A -- Launches (via subprocess) --> B & C & D & E
+    A -- Manages Process (via psutil) --> F
+    B, C, D -- COM Automation --> F
+    E -- Persistent Data Layer --> G
+    H -- Schema Definition & Seeding --> G
+
+    style A fill:#f9f,stroke:#333
+    style F fill:#add8e6,stroke:#333
+    style G fill:#ccffcc,stroke:#333
+```
+
+### Module Responsibilities
+
+| Module | Responsibility | Technical Implementation |
+|--------|----------------|--------------------------|
+| `app.py` | Lifecycle & State Management | QApplication init, AutoCAD process checks (psutil), launches sub-apps via subprocess. |
+| `app_bch.py` | BCH Rating Plate Generation | Converts typed GUI inputs into Config Dict, draws in AutoCAD via COM. |
+| `app_ups.py` | UPS Rating Plate Generation | Electrical conversions (kW=kVA*PF), Multi-Unit Tiling logic, coordinate offsets. |
+| `app_db.py` | DB Rating Plate Generation | Structured output for circuits/protections, precise coordinate-based drawing. |
+| `app_np.py` | Nameplate List I/O | SQLite DAL, grouping logic, Excel/PDF serialization. |
+| `app_np_db_schema.py` | Database Schema | Three-table schema (plate_types, ch_groups, nameplates), foreign keys, seed data. |
+
+---
+
+## ⚙️ Key Workflows
+
+### 1. Rating Plate Drawing: COM Automation
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant G as Plate Generator GUI
+    participant P as pythoncom
+    participant C as win32com.client
+    participant A as AutoCAD Application
+
+    U->>G: Enter configuration
+    G->>P: Call CoInitialize()
+    G->>C: `acad = Dispatch('AutoCAD.Application')`
+    C-->>A: Access active document
+    G->>G: Prepare Config Dict
+    G->>G: Call draw_plates_grid(doc, Config Dict)
+    G->>C: Invoke AutoCAD ModelSpace commands
+    A-->>A: Execute drawing commands
+    C-->>G: Return execution status
+    G->>P: Call CoUninitialize()
+    G->>U: Display status
+```
+
+### 2. Nameplate List Generation & Export
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant N as Nameplate List GUI
+    participant D as SQLite DAL
+    participant I as In-Memory Logic
+    participant E as Export Handler
+
+    U->>N: Select Group ID
+    N->>D: SELECT * FROM nameplates WHERE ch_group_id = ?
+    D-->>N: Return raw record set
+    N->>I: Process records (group, handle qty/repeater)
+    I-->>N: Structured data
+    U->>N: Click Export
+    N->>E: Send data to openpyxl/reportlab
+    E->>E: Generate styled Excel/PDF
+    E-->>U: Save/Open generated file
+```
+
+### 3. Nameplate Database Schema
+```mermaid
+erDiagram
+    plate_types ||--o{ nameplates : has
+    ch_groups ||--o{ nameplates : contains
+
+    plate_types {
+        int id PK
+        string type_name
+        string default_size
+    }
+
+    ch_groups {
+        int id PK
+        string group_name
+    }
+
+    nameplates {
+        int id PK
+        int sl_no
+        int type_id FK "FK references plate_types(id)"
+        int ch_group_id FK "FK references ch_groups(id)"
+        string name
+        int qty
+        int repeater "0=no repeat; N=number of repeated plates"
+    }
+```
+
+---
+
+## 🛠️ Development Notes
+
+### AutoCAD COM Interface
+```python
+import pythoncom
+import win32com.client
+
+try:
+    pythoncom.CoInitialize()
+    acad = win32com.client.Dispatch('AutoCAD.Application')
+    doc = acad.ActiveDocument
+    # Drawing logic
+except Exception as e:
+    pass
+finally:
+    pythoncom.CoUninitialize()
+```
+
+### Drawing Primitives
+- **Lines:** `doc.ModelSpace.AddLine(StartPoint, EndPoint)`
+- **Text:** `doc.ModelSpace.AddMText(InsertionPoint, Width, TextString)`  
+Text must use predefined AutoCAD styles (`STYLE_REG`, `STYLE_BOLD`) in the drawing template.
+
+### Database Logic (`app_np.py`)
+- Ensures `nameplates.db` exists and is structured on startup.
+- Handles repeater logic: `0` = one-off plate, `>0` = multiple sequential plates.
+
+---
+
+## 📜 License
+
+MIT License © [Your Company/Name]
+
