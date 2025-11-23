@@ -7,7 +7,7 @@ Plategen is a **modular Python desktop application** designed for automated gene
 
 Built for teams at **Liveline Electronics**.
 
-[![Latest Release](https://img.shields.io/github/v/release/aamitn/plategen?style=for-the-badge&logo=github&label=Latest%20Version)](https://github.com/aamitn/plategen/releases)
+[![Download](https://img.shields.io/github/v/release/aamitn/plategen?style=for-the-badge&logo=github&label=Latest%20Version)](https://github.com/aamitn/plategen/releases/latest/download/PlateGeneratorSetup.exe)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 
 ---
