@@ -16,12 +16,36 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont, QIcon
 
-APP_VERSION = "v0.2.0-ups"
+# Application version
+try:
+    with open("appver.txt", "r") as f:
+        base_version = f.read().strip()
+except Exception:
+    base_version = "v0.0.0"
+# 2. Append the required suffix
+APP_VERSION = f"{base_version}-ups"
+
 ICON_FILENAME = "plategen_icon.png"
 
 PF_DEFAULT = 0.8
 STYLE_REG = 'Consolas'
 STYLE_BOLD = 'ConsolasBold'
+
+# Default embedded PNG icon (tiny fallback). Place `plategen_icon.png` next
+DEFAULT_ICON_B64 = ("iVBORw0KG")
+
+ICON_FILENAME = "plategen_icon.png"
+
+def ensure_app_icon():
+    here = os.path.dirname(os.path.abspath(__file__))
+    icon_path = os.path.join(here, ICON_FILENAME)
+    if not os.path.exists(icon_path):
+        try:
+            with open(icon_path, 'wb') as f:
+                f.write(base64.b64decode(DEFAULT_ICON_B64))
+        except Exception:
+            return None
+    return icon_path
 
 def ensure_consolas_style(doc):
     """
@@ -390,6 +414,14 @@ class UPSRatingPlateGUI(QMainWindow):
         self.setWindowTitle('UPS Rating Plate Generator')
         self.setMinimumSize(750, 600)
 
+        # Status Bar
+        status_bar = self.statusBar()
+        version_label = QLabel(f"Version: {APP_VERSION}")
+        version_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        version_label.setMinimumWidth(150)
+        status_bar.addWidget(version_label, 1) # The stretch factor (1) pushes it to the right
+        
+
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
         layout = QVBoxLayout(main_widget)
@@ -417,6 +449,20 @@ class UPSRatingPlateGUI(QMainWindow):
         layout.addWidget(scroll)
 
         btn = QPushButton('Generate Rating Plate')
+        btn.setMinimumHeight(40)
+        btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                font-size: 14px;
+                font-weight: bold;
+                border-radius: 5px;
+                padding: 10px 30px;
+            }
+            QPushButton:hover {
+                background-color: #45a049;
+            }
+        """)
         btn.clicked.connect(self.generate_plate)
         layout.addWidget(btn)
 
@@ -781,6 +827,16 @@ class UPSRatingPlateGUI(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
+    app.setStyle('Fusion')
+
+    try:
+        icon_path = ensure_app_icon()
+        if icon_path:
+            app.setWindowIcon(QIcon(icon_path))
+    except Exception:
+        pass
+
+
     window = UPSRatingPlateGUI()
     window.show()
     sys.exit(app.exec())

@@ -48,3 +48,6 @@ desktop.ini
 # App-specific files
 # -------------------------------
 Sticker_Generator_README.md
+
+*.dwl
+*.dwl2
