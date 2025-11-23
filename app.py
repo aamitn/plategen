@@ -84,7 +84,7 @@ DEFAULT_GITHUB_REPO = 'aamitn/winhider'
 
 def read_local_version():
     try:
-        with open(APPVER_FILE, 'r', encoding='utf-8') as f:
+        with open("appver.txt", "r") as f:
             return f.read().strip()
     except Exception:
         return 'v0.0.0'
