@@ -31,6 +31,10 @@ Source: "..\dist\app_ups.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\dist\app_bch.exe"; DestDir: "{app}"; Flags: ignoreversion
 ; db app executable
 Source: "..\dist\app_db.exe"; DestDir: "{app}"; Flags: ignoreversion
+; nameplate app executable
+Source: "..\dist\app_np.exe"; DestDir: "{app}"; Flags: ignoreversion
+; nameplate db schema app executable
+Source: "..\dist\app_np_db_schema.exe"; DestDir: "{app}"; Flags: ignoreversion
 ; template docx (copied to app dir)
 Source: "..\liveline_logo.dwg"; DestDir: "{app}"; Flags: ignoreversion
 ; app icon for shortcuts
