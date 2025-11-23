@@ -2,7 +2,7 @@
 
 # Plategen ⭐: Industrial Plate Generation Suite
 
-Plategen is a **modular Python desktop application** designed for automated generation of technical rating plates and nameplates for heavy industrial electrical equipment, including UPS, BCH, AC/DC DB panels. It provides **direct integration with AutoCAD via COM automation**, ensuring high precision and eliminating manual drafting errors in critical manufacturing documentation.
+Plategen is a **modular desktop application** designed for automated generation of technical rating plates and nameplates for heavy industrial electrical equipment, including UPS, BCH, AC/DC DB panels. It provides **direct integration with AutoCAD via COM automation**, ensuring high precision and eliminating manual drafting errors in critical manufacturing documentation.
 
 
 Built for teams at **Liveline Electronics**.
