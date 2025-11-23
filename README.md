@@ -1,6 +1,6 @@
 <img src="./plategen_icon.ico" align="left" width="75">
 
-# Plategen ⭐: Industrial Plate Generation Suite
+# Plategen : Industrial Plate Generation Suite
 
 Plategen is a **modular desktop application** designed for automated generation of technical rating plates and nameplates for heavy industrial electrical equipment, including UPS, BCH, AC/DC DB panels. It provides **direct integration with AutoCAD via COM automation**, ensuring high precision and eliminating manual drafting errors in critical manufacturing documentation.
 
@@ -12,19 +12,19 @@ Built for teams at **Liveline Electronics**.
 
 ---
 
-## 🌟 Features Overview
+##  Features Overview
 
 | Feature | Description | Key Technology |
 |---------|------------|----------------|
-| 🎨 Multi-plate Generator | Decoupled PyQt6 UIs for handling distinct domain models (UPS, BCH, DB, Nameplate Lists). | PyQt6 |
-| 🖼️ AutoCAD COM Automation | Direct manipulation of AutoCAD Object Model via `win32com.client` (Windows Only). | Python COM (`pywin32`) |
-| 📊 Structured Export | Generate complex, styled manufacturing reports and Bills of Materials (BOMs). | `openpyxl`, `reportlab` |
-| 🔋 Domain Configuration | Structured data entry and validation for electrical parameters (e.g., kVA/PF calculation, circuit configs). | PyQt6 Validation, Internal Calculation Logic |
-| 🗂️ Launcher Hub | Central process managing lifecycle, AutoCAD detection, and update sync. | PyQt6, `psutil`, `subprocess` |
+|  Multi-plate Generator | Decoupled PyQt6 UIs for handling distinct domain models (UPS, BCH, DB, Nameplate Lists). | PyQt6 |
+|  AutoCAD COM Automation | Direct manipulation of AutoCAD Object Model via `win32com.client` (Windows Only). | Python COM (`pywin32`) |
+|  Structured Export | Generate complex, styled manufacturing reports and Bills of Materials (BOMs). | `openpyxl`, `reportlab` |
+|  Domain Configuration | Structured data entry and validation for electrical parameters (e.g., kVA/PF calculation, circuit configs). | PyQt6 Validation, Internal Calculation Logic |
+|  Launcher Hub | Central process managing lifecycle, AutoCAD detection, and update sync. | PyQt6, `psutil`, `subprocess` |
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### System Prerequisites
 - **OS:** Windows 10/11 (Required for AutoCAD COM Interoperability)  
@@ -54,7 +54,7 @@ python app.py
 
 ---
 
-## 📐 Application Architecture
+##  Application Architecture
 
 Plategen follows a **Micro-Application Architecture** with a central launcher orchestrating multiple specialized generator modules.
 
@@ -99,7 +99,7 @@ graph TD
 
 ---
 
-## ⚙️ Key Workflows
+##  Key Workflows
 
 ### 1. Rating Plate Drawing: COM Automation
 ```mermaid
@@ -173,7 +173,7 @@ erDiagram
 
 ---
 
-## 🛠️ Development Notes
+## ️ Development Notes
 
 ### AutoCAD COM Interface
 ```python
@@ -202,7 +202,7 @@ Text must use predefined AutoCAD styles (`STYLE_REG`, `STYLE_BOLD`) in the drawi
 
 ---
 
-## 📜 License
+##  License
 
-MIT License © [Your Company/Name]
+MIT License © [Bitmutex Technologies ; Liveline Eletronics]
 
