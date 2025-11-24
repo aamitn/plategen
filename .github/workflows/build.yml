@@ -91,12 +91,21 @@ jobs:
       # -------------------------------
       - name: 📦 Create ZIP
         shell: pwsh
-        env:
-          TAG: ${{ steps.vars.outputs.tag }}
+        # FIX: Directly interpolate the tag output into the PowerShell variable
+        # instead of relying on the step-level 'env' block for safer interpolation.
         run: |
+          $TAG = "${{ steps.vars.outputs.tag }}"
           $DIST_DIR = "dist_release"
-          $ZIP_FILE = "$DIST_DIR-$env:TAG.zip"
+          $ZIP_FILE = "$DIST_DIR-$TAG.zip"
+          Write-Host "TAG detected: $TAG"
           Write-Host "Creating $ZIP_FILE"
+          
+          # Check if the directory exists before zipping
+          if (-not (Test-Path -Path $DIST_DIR -PathType Container)) {
+              Write-Error "Distribution directory '$DIST_DIR' not found."
+              exit 1
+          }
+
           Compress-Archive -Path "$DIST_DIR\*" -DestinationPath "$ZIP_FILE" -Force
 
       # -------------------------------
@@ -113,8 +122,15 @@ jobs:
         env:
           TAG: ${{ steps.vars.outputs.tag }}
         run: |
+          # The TAG environment variable is used here
+          $TAG = $env:TAG
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "installer\iscript.iss"
-          copy "installer\output\PlateGenSetup.exe" "PlateGenSetup-$env:TAG.exe"
+          
+          # Copy to the root folder with the tagged name
+          copy "installer\output\PlateGenSetup.exe" "PlateGenSetup-$TAG.exe"
+          
+          # Also copy a version without the tag for easier reference/debugging if needed
+          copy "installer\output\PlateGenSetup.exe" "PlateGenSetup.exe"
 
       # -------------------------------
       # 9. Create GitHub Release
@@ -125,9 +141,10 @@ jobs:
           tag_name: ${{ steps.vars.outputs.tag }}
           name: ${{ steps.vars.outputs.release_name }}
           draft: false
-          prerelease: ${{ steps.vars.outputs.tag == 'Snapshot' }}
+          # Snapshot tags are treated as prereleases
+          prerelease: ${{ startsWith(steps.vars.outputs.tag, 'snapshot') }}
           files: |
             dist_release-${{ steps.vars.outputs.tag }}.zip
-            PlateGenSetup-${{ steps.vars.outputs.tag }}.exe
+            PlateGenSetup-${{ steps.vars.outputs.tag }}.exe # FIX: Use the tagged filename for the installer
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
