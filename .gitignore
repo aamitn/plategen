@@ -20,8 +20,6 @@ venv/
 # -------------------------------
 build/
 dist/
-installer/output/
-*.spec
 
 # -------------------------------
 # Inno Setup Installer Outputs
