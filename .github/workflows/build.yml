@@ -3,11 +3,9 @@ name: Build and Release Plategen Workflow
 
 on:
   push:
-    branches:
-      - main
-      - master
     tags:
-      - '*'
+      - 'v*'          # version tags like v1.0.0, v2.5.9
+      - 'snapshot*'   # snapshot tags like snapshot-21-11-2025
 
 permissions:
   contents: write
