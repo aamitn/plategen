@@ -35,8 +35,8 @@ jobs:
       # -------------------------------
       - name: 📦 Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          # python -m pip install --upgrade pip
+          # pip install -r requirements.txt
 
       # -------------------------------
       # 4. Build standalone executables
@@ -46,21 +46,21 @@ jobs:
           $DIST_DIR = "dist_release"
 
           # Build all EXEs
-          pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/plategen_icon.ico --name=plategen app.py --add-data "installer/icons/plategen_icon.ico;installer/icons" --collect-all requests
-          pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/plategen_icon.ico --name=app_db app_db.py --add-data "installer/icons/plategen_icon.ico;installer/icons" --collect-all requests
-          pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/plategen_icon.ico --name=app_ups app_ups.py --add-data "installer/icons/plategen_icon.ico;installer/icons" --collect-all requests
-          pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/plategen_icon.ico --name=app_bch app_bch.py --add-data "installer/icons/plategen_icon.ico;installer/icons" --collect-all requests
-          pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/plategen_icon.ico --name=app_np app_np.py --add-data "installer/icons/plategen_icon.ico;installer/icons" --collect-all requests
-          pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/plategen_icon.ico --name=app_np_db_schema app_np_db_schema.py --add-data "installer/icons/plategen_icon.ico;installer/icons" --collect-all requests
-          pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/sticker_icon.ico --name=app_sticker app_sticker.py --add-data "installer/icons/sticker_icon.ico;installer/icons" --collect-all requests
-          pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/manual_icon.ico --name=app_mgen_ups app_mgen_ups.py --add-data "installer/icons/manual_icon.ico;installer/icons" --collect-all requests
-          pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/manual_icon.ico --name=app_mgen_bch app_mgen_bch.py --add-data "installer/icons/manual_icon.ico;installer/icons" --collect-all requests
+          # pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/plategen_icon.ico --name=plategen app.py --add-data "installer/icons/plategen_icon.ico;installer/icons" --collect-all requests
+          # pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/plategen_icon.ico --name=app_db app_db.py --add-data "installer/icons/plategen_icon.ico;installer/icons" --collect-all requests
+          # pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/plategen_icon.ico --name=app_ups app_ups.py --add-data "installer/icons/plategen_icon.ico;installer/icons" --collect-all requests
+          # pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/plategen_icon.ico --name=app_bch app_bch.py --add-data "installer/icons/plategen_icon.ico;installer/icons" --collect-all requests
+          # pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/plategen_icon.ico --name=app_np app_np.py --add-data "installer/icons/plategen_icon.ico;installer/icons" --collect-all requests
+          # pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/plategen_icon.ico --name=app_np_db_schema app_np_db_schema.py --add-data "installer/icons/plategen_icon.ico;installer/icons" --collect-all requests
+          # pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/sticker_icon.ico --name=app_sticker app_sticker.py --add-data "installer/icons/sticker_icon.ico;installer/icons" --collect-all requests
+          # pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/manual_icon.ico --name=app_mgen_ups app_mgen_ups.py --add-data "installer/icons/manual_icon.ico;installer/icons" --collect-all requests
+          # pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/manual_icon.ico --name=app_mgen_bch app_mgen_bch.py --add-data "installer/icons/manual_icon.ico;installer/icons" --collect-all requests
 
           # Create dist directory
           mkdir $DIST_DIR
 
           # Copy all EXEs
-          copy dist\*.exe $DIST_DIR\
+          # copy dist\*.exe $DIST_DIR\
 
           # Copy resources
           copy appver.txt $DIST_DIR\
@@ -125,10 +125,7 @@ jobs:
           # The TAG environment variable is used here
           $TAG = $env:TAG
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "installer\iscript.iss"
-          
-          # Copy to the root folder with the tagged name
-          copy "installer\output\PlateGenSetup.exe" "PlateGenSetup-$TAG.exe"
-          
+
           # Also copy a version without the tag for easier reference/debugging if needed
           copy "installer\output\PlateGenSetup.exe" "PlateGenSetup.exe"
 
@@ -145,6 +142,6 @@ jobs:
           prerelease: ${{ startsWith(steps.vars.outputs.tag, 'snapshot') }}
           files: |
             dist_release-${{ steps.vars.outputs.tag }}.zip
-            PlateGenSetup-${{ steps.vars.outputs.tag }}.exe # FIX: Use the tagged filename for the installer
+            PlateGenSetup.exe 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
