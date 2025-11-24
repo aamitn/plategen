@@ -8,38 +8,6 @@ import json
 import webbrowser
 import time
 
-# Default embedded PNG icon (tiny fallback). Place `plategen_icon.png` next
-DEFAULT_ICON_B64 = ("iVBORw0KG")
-
-ICON_FILENAME = "plategen_icon.png"
-
-def ensure_app_icon():
-    import sys, os, base64
-
-    # Determine application runtime folder
-    if hasattr(sys, '_MEIPASS'):
-        # Running from PyInstaller bundle
-        run_dir = sys._MEIPASS
-    else:
-        # Running from source
-        run_dir = os.path.dirname(os.path.abspath(__file__))
-
-    icon_path = os.path.join(run_dir, ICON_FILENAME)
-
-    # If running in PyInstaller mode, just return it (no write allowed)
-    if hasattr(sys, '_MEIPASS'):
-        return icon_path if os.path.exists(icon_path) else None
-
-    # Running from source → ensure icon exists, generate if missing
-    if not os.path.exists(icon_path):
-        try:
-            with open(icon_path, 'wb') as f:
-                f.write(base64.b64decode(DEFAULT_ICON_B64))
-        except Exception:
-            return None
-
-    return icon_path
-
 
 # TASKBAR ICON TWEAK FOR WINDOWS
 def set_windows_app_id():
@@ -79,7 +47,7 @@ from PyQt6.QtCore import Qt, pyqtSignal, QSettings, QTimer
 from PyQt6.QtGui import QIcon, QAction
 
 APPVER_FILE = os.path.join(os.path.dirname(__file__), 'appver.txt')
-DEFAULT_GITHUB_REPO = 'aamitn/winhider'
+DEFAULT_GITHUB_REPO = 'aamitn/plategen'
 
 
 def read_local_version():
@@ -132,10 +100,13 @@ class LauncherWindow(QMainWindow):
         here = get_app_dir()
         if apps is None:
             apps = [
-                ('Battery Charger (BCH)', 'app_bch.py'),
-                ('DB Rating Plate (DB)', 'app_db.py'),
-                ('UPS Rating Plate (UPS)', 'app_ups.py'),
-                ('Nameplate', 'app_np.py'),
+                ('⏹️Rating Plate (Charger)', 'app_bch.py'),
+                ('⏹️Rating Plate (DB)', 'app_db.py'),
+                ('⏹️Rating Plate (UPS)', 'app_ups.py'),
+                ('🗃️Nameplate', 'app_np.py'),
+                ('📚Manual/Spec (UPS)', 'app_mgen_ups.py'),
+                ('📚Manual/Spec (Charger)', 'app_mgen_bch.py'),
+                ('🔶Sticker Generator', 'app_sticker.py'),
             ]
         self.apps = [(label, os.path.join(here, fname)) for label, fname in apps]
 
@@ -764,13 +735,7 @@ def main():
     app = QApplication(sys.argv)
     app.setStyle('Fusion')
     
-    # Ensure app icon exists and set it for the application and main window
-    try:
-        icon_path = ensure_app_icon()
-        if icon_path:
-            app.setWindowIcon(QIcon(icon_path))
-    except Exception:
-        pass
+    app.setWindowIcon(QIcon.fromTheme("go-home"))
 
     # Try to read a repository override from env var (optional)
     repo = os.environ.get('PLATGEN_GITHUB_REPO', DEFAULT_GITHUB_REPO)

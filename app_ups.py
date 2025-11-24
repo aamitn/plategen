@@ -26,27 +26,9 @@ except Exception:
 # 2. Append the required suffix
 APP_VERSION = f"{base_version}-ups"
 
-ICON_FILENAME = "plategen_icon.png"
-
 PF_DEFAULT = 0.8
 STYLE_REG = 'Consolas'
 STYLE_BOLD = 'ConsolasBold'
-
-# Default embedded PNG icon (tiny fallback). Place `plategen_icon.png` next
-DEFAULT_ICON_B64 = ("iVBORw0KG")
-
-ICON_FILENAME = "plategen_icon.png"
-
-def ensure_app_icon():
-    here = os.path.dirname(os.path.abspath(__file__))
-    icon_path = os.path.join(here, ICON_FILENAME)
-    if not os.path.exists(icon_path):
-        try:
-            with open(icon_path, 'wb') as f:
-                f.write(base64.b64decode(DEFAULT_ICON_B64))
-        except Exception:
-            return None
-    return icon_path
 
 def ensure_consolas_style(doc):
     """
@@ -830,14 +812,7 @@ def main():
     
     app = QApplication(sys.argv)
     app.setStyle('Fusion')
-
-    try:
-        icon_path = ensure_app_icon()
-        if icon_path:
-            app.setWindowIcon(QIcon(icon_path))
-    except Exception:
-        pass
-
+    app.setWindowIcon(QIcon.fromTheme("appointment-new"))
 
     window = UPSRatingPlateGUI()
     window.show()

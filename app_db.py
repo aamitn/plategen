@@ -31,21 +31,6 @@ except Exception:
 # 2. Append the required suffix
 APP_VERSION = f"{base_version}-db"
 APP_NAME = 'DB Rating Plate Generator'
-# Default embedded PNG icon (tiny fallback). Place `plategen_icon.png` next
-DEFAULT_ICON_B64 = ("iVBORw0KG")
-
-ICON_FILENAME = "plategen_icon.png"
-
-def ensure_app_icon():
-    here = os.path.dirname(os.path.abspath(__file__))
-    icon_path = os.path.join(here, ICON_FILENAME)
-    if not os.path.exists(icon_path):
-        try:
-            with open(icon_path, 'wb') as f:
-                f.write(base64.b64decode(DEFAULT_ICON_B64))
-        except Exception:
-            return None
-    return icon_path
 
 
 def make_safearray_3d(points):
@@ -751,14 +736,7 @@ class DBRatingPlateGUI(QMainWindow):
 def main():
     app = QApplication(sys.argv)
     app.setStyle('Fusion')
-
-    # Ensure app icon exists and set it for the application and main window
-    try:
-        icon_path = ensure_app_icon()
-        if icon_path:
-            app.setWindowIcon(QIcon(icon_path))
-    except Exception:
-        pass
+    app.setWindowIcon(QIcon.fromTheme("appointment-new"))
     
     w = DBRatingPlateGUI()
     w.show()

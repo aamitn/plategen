@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QMessageBox, QHeaderView
 )
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QFont, QIcon
 from PyQt6.QtWidgets import QSpinBox
 import sys
 import urllib.request
@@ -23,7 +23,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 
 
 DB_FILE = 'nameplates.db'
-DB_URL = 'https://gitlab.com/aamitn/assets/-/raw/main/nameplate_excel_liveline/nameplates.db'
+DB_URL = 'https://raw.githubusercontent.com/aamitn/plategen/main/db_export/nameplates.db'
 DB_SCHEMA_PY = 'app_np_db_schema.py'
 DB_SCHEMA_EXE = 'app_np_db_schema.exe'
 
@@ -707,10 +707,13 @@ class NameplateApp(QWidget):
                 removed_rows += 1
 
         QMessageBox.information(self, "Clear Entries", f"Cleared {removed_rows} entries.")
+
 # ------------------- Run App -------------------
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle('windows11')
+    app.setWindowIcon(QIcon.fromTheme("document-send"))
     window = NameplateApp()
     window.show()
+    window.resize(1024, 768)  
     sys.exit(app.exec())

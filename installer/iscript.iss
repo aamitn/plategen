@@ -20,7 +20,7 @@ ArchitecturesInstallIn64BitMode=x64
 ; Custom wizard images
 WizardSmallImageFile=logo.bmp    
 ; Use the main app icon (from project root)
-SetupIconFile="..\plategen_icon.ico"
+SetupIconFile=".\icons\plategen_icon.ico"
 
 [Files]
 ; main app executable
@@ -35,12 +35,24 @@ Source: "..\dist\app_db.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\dist\app_np.exe"; DestDir: "{app}"; Flags: ignoreversion
 ; nameplate db schema app executable
 Source: "..\dist\app_np_db_schema.exe"; DestDir: "{app}"; Flags: ignoreversion
-; template docx (copied to app dir)
+; front back sticker app executable
+Source: "..\dist\app_sticker.exe"; DestDir: "{app}"; Flags: ignoreversion
+; Manual Generator Ups App Executable
+Source: "..\dist\app_mgen_ups.exe"; DestDir: "{app}"; Flags: ignoreversion
+; Manual Generator Ups App Executable
+Source: "..\dist\app_mgen_bch.exe"; DestDir: "{app}"; Flags: ignoreversion
+; logo dwg (copied to app dir)
 Source: "..\liveline_logo.dwg"; DestDir: "{app}"; Flags: ignoreversion
+; template docx ups(copied to app dir)
+Source: "..\template-mgen-ups.docx"; DestDir: "{app}"; Flags: ignoreversion
+; template docx bch(copied to app dir)
+Source: "..\template-mgen-bch.docx"; DestDir: "{app}"; Flags: ignoreversion
 ; app icon for shortcuts
-Source: "..\plategen_icon.ico"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\icons\plategen_icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 ; appver file
 Source: "..\appver.txt"; DestDir: "{app}"; Flags: ignoreversion
+; sticker image file
+Source: "..\sticker.png"; DestDir: "{app}"; Flags: ignoreversion
 ; sqlite dbfile
 Source: "..\db_export\nameplates.db"; DestDir: "{app}"; Flags: ignoreversion
 

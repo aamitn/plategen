@@ -39,31 +39,47 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # -------------------------------
-      # 4. Build standalone executables
-      # -------------------------------
       - name: 🏗️ Build standalone executables
         run: |
-          pyinstaller --clean --noconfirm --onefile --windowed --icon=plategen_icon.ico --name=plategen app.py --add-data "plategen_icon.ico;." --collect-all requests
-          pyinstaller --clean --noconfirm --onefile --windowed --icon=plategen_icon.ico --name=app_db app_db.py --add-data "plategen_icon.ico;." --collect-all requests
-          pyinstaller --clean --noconfirm --onefile --windowed --icon=plategen_icon.ico --name=app_ups app_ups.py --add-data "plategen_icon.ico;." --collect-all requests
-          pyinstaller --clean --noconfirm --onefile --windowed --icon=plategen_icon.ico --name=app_bch app_bch.py --add-data "plategen_icon.ico;." --collect-all requests
-          pyinstaller --clean --noconfirm --onefile --windowed --icon=plategen_icon.ico --name=app_np app_np.py --add-data "plategen_icon.ico;." --collect-all requests          
-          pyinstaller --clean --noconfirm --onefile --windowed --icon=plategen_icon.ico --name=app_np_db_schema app_np_db_schema.py --add-data "plategen_icon.ico;." --collect-all requests          
+          # Set output directory variable
+          $DIST_DIR = "dist_release"
 
-          mkdir dist_release
+          # Build all EXEs
+          pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/plategen_icon.ico --name=plategen app.py --add-data "installer/icons/plategen_icon.ico;installer/icons" --collect-all requests
+          pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/plategen_icon.ico --name=app_db app_db.py --add-data "installer/icons/plategen_icon.ico;installer/icons" --collect-all requests
+          pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/plategen_icon.ico --name=app_ups app_ups.py --add-data "installer/icons/plategen_icon.ico;installer/icons" --collect-all requests
+          pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/plategen_icon.ico --name=app_bch app_bch.py --add-data "installer/icons/plategen_icon.ico;installer/icons" --collect-all requests
+          pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/plategen_icon.ico --name=app_np app_np.py --add-data "installer/icons/plategen_icon.ico;installer/icons" --collect-all requests
+          pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/plategen_icon.ico --name=app_np_db_schema app_np_db_schema.py --add-data "installer/icons/plategen_icon.ico;installer/icons" --collect-all requests
+          pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/sticker_icon.ico --name=app_sticker app_sticker.py --add-data "installer/icons/sticker_icon.ico;installer/icons" --collect-all requests
+          pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/manual_icon.ico --name=app_mgen_ups app_mgen_ups.py --add-data "installer/icons/manual_icon.ico;installer/icons" --collect-all requests
+          pyinstaller --clean --noconfirm --onefile --windowed --icon=installer/icons/manual_icon.ico --name=app_mgen_bch app_mgen_bch.py --add-data "installer/icons/manual_icon.ico;installer/icons" --collect-all requests
+
+          # Create dist directory
+          mkdir $DIST_DIR
+
+          # Copy executables
+          copy dist\plategen.exe $DIST_DIR\
+          copy dist\app_db.exe $DIST_DIR\
+          copy dist\app_ups.exe $DIST_DIR\
+          copy dist\app_bch.exe $DIST_DIR\
+          copy dist\app_np.exe $DIST_DIR\
+          copy dist\app_np_db_schema.exe $DIST_DIR\
+          copy dist\app_sticker.exe $DIST_DIR\
+          copy dist\app_mgen_ups.exe $DIST_DIR\
+          copy dist\app_mgen_bch.exe $DIST_DIR\
+
+          # Copy resources
+          copy appver.txt $DIST_DIR\
+          copy template-mgen-bch.docx $DIST_DIR\
+          copy template-mgen-ups.docx $DIST_DIR\
+          copy liveline_logo.dwg $DIST_DIR\
+          copy sticker.png $DIST_DIR\
+          copy db_export\nameplates.db $DIST_DIR\
           
-          copy dist\plategen.exe dist_release\
-          copy dist\app_db.exe dist_release\
-          copy dist\app_ups.exe dist_release\
-          copy dist\app_bch.exe dist_release\
-          copy dist\app_np.exe dist_release\
-          copy dist\app_np_db_schema.exe dist_release\
-          copy appver.txt dist_release\
-          copy db_export\nameplates.db dist_release\
-          
-          # Create ZIP of dist_release contents
-          powershell -Command "Compress-Archive -Path dist_release\* -DestinationPath dist_release.zip -Force"
+          # Create ZIP
+          powershell -Command "Compress-Archive -Path $DIST_DIR\* -DestinationPath \"$DIST_DIR-${{ steps.vars.outputs.tag }}.zip\" -Force"
+
 
       # -------------------------------
       # 5. Install Inno Setup
@@ -78,7 +94,7 @@ jobs:
         shell: cmd
         run: |
           "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "installer\iscript.iss"
-          copy "installer\output\PlateGeneratorSetup.exe" "PlateGeneratorSetup.exe"
+          copy "installer\output\PlateGenSetup.exe" "PlateGenSetup.exe"
 
       # -------------------------------
       # 7. Determine release tag and name
@@ -106,7 +122,7 @@ jobs:
           draft: false
           prerelease: ${{ steps.vars.outputs.tag == 'Snapshot' }}
           files: |
-            dist_release.zip
-            PlateGeneratorSetup.exe
+            dist_release-${{ steps.vars.outputs.tag }}.zip
+            PlateGenSetup-${{ steps.vars.outputs.tag }}.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
