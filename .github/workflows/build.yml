@@ -15,6 +15,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
+
       # -------------------------------
       # 1. Checkout repository
       # -------------------------------
@@ -37,9 +38,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # -------------------------------
+      # 4. Build standalone executables
+      # -------------------------------
       - name: 🏗️ Build standalone executables
         run: |
-          # Set output directory variable
           $DIST_DIR = "dist_release"
 
           # Build all EXEs
@@ -56,16 +59,8 @@ jobs:
           # Create dist directory
           mkdir $DIST_DIR
 
-          # Copy executables
-          copy dist\plategen.exe $DIST_DIR\
-          copy dist\app_db.exe $DIST_DIR\
-          copy dist\app_ups.exe $DIST_DIR\
-          copy dist\app_bch.exe $DIST_DIR\
-          copy dist\app_np.exe $DIST_DIR\
-          copy dist\app_np_db_schema.exe $DIST_DIR\
-          copy dist\app_sticker.exe $DIST_DIR\
-          copy dist\app_mgen_ups.exe $DIST_DIR\
-          copy dist\app_mgen_bch.exe $DIST_DIR\
+          # Copy all EXEs
+          copy dist\*.exe $DIST_DIR\
 
           # Copy resources
           copy appver.txt $DIST_DIR\
@@ -74,28 +69,9 @@ jobs:
           copy liveline_logo.dwg $DIST_DIR\
           copy sticker.png $DIST_DIR\
           copy db_export\nameplates.db $DIST_DIR\
-          
-          # Create ZIP
-          powershell -Command "Compress-Archive -Path $DIST_DIR\* -DestinationPath \"$DIST_DIR-${{ steps.vars.outputs.tag }}.zip\" -Force"
-
 
       # -------------------------------
-      # 5. Install Inno Setup
-      # -------------------------------
-      - name: 🧰 Install Inno Setup
-        run: choco install innosetup --no-progress -y
-
-      # -------------------------------
-      # 6. Build installer (.exe) separately
-      # -------------------------------
-      - name: 📦 Build installer (.exe)
-        shell: cmd
-        run: |
-          "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "installer\iscript.iss"
-          copy "installer\output\PlateGenSetup.exe" "PlateGenSetup.exe"
-
-      # -------------------------------
-      # 7. Determine release tag and name
+      # 5. Determine release tag and name
       # -------------------------------
       - name: 🧾 Determine release tag and name
         id: vars
@@ -106,11 +82,42 @@ jobs:
           else
             TAG="Snapshot"
           fi
+
           echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "release_name=Sticker Generator - $TAG" >> $GITHUB_OUTPUT
+          echo "release_name=Plategen - $TAG" >> $GITHUB_OUTPUT
 
       # -------------------------------
-      # 8. Create GitHub Release
+      # 6. Create ZIP after tag detected
+      # -------------------------------
+      - name: 📦 Create ZIP
+        shell: pwsh
+        env:
+          TAG: ${{ steps.vars.outputs.tag }}
+        run: |
+          $DIST_DIR = "dist_release"
+          $ZIP_FILE = "$DIST_DIR-$env:TAG.zip"
+          Write-Host "Creating $ZIP_FILE"
+          Compress-Archive -Path "$DIST_DIR\*" -DestinationPath "$ZIP_FILE" -Force
+
+      # -------------------------------
+      # 7. Install Inno Setup
+      # -------------------------------
+      - name: 🧰 Install Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      # -------------------------------
+      # 8. Build installer (.exe)
+      # -------------------------------
+      - name: 📦 Build installer (.exe)
+        shell: pwsh
+        env:
+          TAG: ${{ steps.vars.outputs.tag }}
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "installer\iscript.iss"
+          copy "installer\output\PlateGenSetup.exe" "PlateGenSetup-$env:TAG.exe"
+
+      # -------------------------------
+      # 9. Create GitHub Release
       # -------------------------------
       - name: 🚀 Create GitHub Release
         uses: softprops/action-gh-release@v2
