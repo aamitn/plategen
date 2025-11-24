@@ -1,5 +1,5 @@
 # Author: Bitmutex Technologies
-name: Build and Release Plategen
+name: Build and Release Plategen Workflow
 
 on:
   push:
