@@ -7,7 +7,7 @@ Plategen is a **modular desktop application** designed for automated generation 
 
 Built for teams at **Liveline Electronics**.
 
-[![Download](https://img.shields.io/github/v/release/aamitn/plategen?style=for-the-badge&logo=github&label=Latest%20Version)](https://github.com/aamitn/plategen/releases/latest/download/PlateGenSetup.exe)
+[![Download](https://img.shields.io/github/v/release/aamitn/plategen?style=for-the-badge&logo=github&label=Download)](https://github.com/aamitn/plategen/releases/latest/download/PlateGenSetup.exe)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 
 ---
