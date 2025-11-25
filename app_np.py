@@ -81,7 +81,7 @@ def fetch_nameplates(ch_group_id):
 
     repeater_map = {
         'SFCB': [''],               
-        'DFCB': ['(Charger 1)', '(Charger 2)'],
+        'DFCB': ['(CH-I)', '(CH-II)'],
         'FFCB': ['(FC)', '(FCB)']
     }
 

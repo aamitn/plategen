@@ -69,6 +69,8 @@ jobs:
           copy liveline_logo.dwg $DIST_DIR\
           copy sticker.png $DIST_DIR\
           copy db_export\nameplates.db $DIST_DIR\
+          copy acadiso.dwt $DIST_DIR\
+          
 
       # -------------------------------
       # 5. Determine release tag and name

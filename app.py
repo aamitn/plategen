@@ -207,6 +207,12 @@ class LauncherWindow(QMainWindow):
         self.kill_acad_btn.setToolTip('Forcefully close all running AutoCAD instances.')
         self.kill_acad_btn.clicked.connect(self.kill_autocad_process)
         self.kill_acad_btn.setEnabled(False) # Disabled initially
+
+        # Launch AutoCAD Template button
+        self.launch_template_btn = QPushButton('Launch ACAD Template')
+        self.launch_template_btn.setToolTip('Opens acadiso.dwt as a new drawing in AutoCAD.')
+        self.launch_template_btn.clicked.connect(self.launch_autocad_template)
+        bottom.addWidget(self.launch_template_btn)
         
         bottom.addWidget(self.kill_acad_btn)
         
@@ -302,6 +308,47 @@ class LauncherWindow(QMainWindow):
         finally:
             # Ensure UI status and button states are updated on the main thread after completion
             QTimer.singleShot(0, self.update_autocad_status)
+
+    def launch_autocad_template(self):
+        """
+        Opens acadiso.dwt in AutoCAD. If AutoCAD is not running,
+        it will start it, then load the new drawing.
+        """
+        template_path = os.path.abspath("acadiso.dwt")
+
+        if not os.path.exists(template_path):
+            QMessageBox.critical(
+                self,
+                'Template Not Found',
+                f"acadiso.dwt not found at:\n{template_path}"
+            )
+            return
+
+        try:
+            # Ensure AutoCAD is running or start it
+            self.launch_autocad(wait=True)
+
+            import pythoncom
+            pythoncom.CoInitialize()
+
+            acad = win32com.client.Dispatch("AutoCAD.Application")
+            acad.Visible = True
+
+            # Open new drawing from template
+            acad.Documents.Add(template_path)
+
+            QMessageBox.information(
+                self,
+                "Template Loaded",
+                "A new drawing was created from acadiso.dwt."
+            )
+
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "AutoCAD Error",
+                f"Could not load template:\n{e}"
+            )
 
 
     # --- AutoCAD Status and Control Methods ---

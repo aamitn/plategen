@@ -55,6 +55,8 @@ Source: "..\appver.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\sticker.png"; DestDir: "{app}"; Flags: ignoreversion
 ; sqlite dbfile
 Source: "..\db_export\nameplates.db"; DestDir: "{app}"; Flags: ignoreversion
+; autocad template file
+Source: "..\acadiso.dwt"; DestDir: "{app}"; Flags: ignoreversion
 
 
 [Icons]

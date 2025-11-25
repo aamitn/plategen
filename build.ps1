@@ -58,6 +58,29 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host Executable built distapp.exe
 
 # -------------------------------------------------------------
+# Copy runtime resources into PyInstaller dist folder
+# -------------------------------------------------------------
+Write-Host Copying resources into dist...
+
+$DIST_DIR = "dist"
+
+if (!(Test-Path $DIST_DIR)) {
+    Write-Host ERROR: dist directory does not exist!
+    exit 1
+}
+
+copy appver.txt               "$DIST_DIR\" -Force
+copy template-mgen-bch.docx   "$DIST_DIR\" -Force
+copy template-mgen-ups.docx   "$DIST_DIR\" -Force
+copy liveline_logo.dwg        "$DIST_DIR\" -Force
+copy sticker.png              "$DIST_DIR\" -Force
+copy db_export\nameplates.db  "$DIST_DIR\" -Force
+copy acadiso.dwt              "$DIST_DIR\" -Force
+
+Write-Host Resources copied successfully into dist folder.
+
+
+# -------------------------------------------------------------
 # Build installer with Inno Setup
 # -------------------------------------------------------------
 Write-Host Building installer with Inno Setup...

@@ -31,30 +31,12 @@ STYLE_REG = 'Consolas'
 STYLE_BOLD = 'ConsolasBold'
 
 def ensure_consolas_style(doc):
-    """
-    Returns a text style named 'ConsolasStyle'.
-    NOTE: AutoCAD COM cannot set fonts via Python; style must already exist
-    inside the DWG template if you want correct fonts.
-    """
     styles = doc.TextStyles
     try:
-        st = styles.Item("ConsolasStyle")
-        return st
+        return styles.Item("Standard")
     except:
-        st = styles.Add("ConsolasStyle")
-        return st
-
-def ensure_consolas_bold_style(doc):
-    """
-    Returns a bold text style named 'ConsolasBold'.
-    Font must already be bold inside DWG; COM cannot set it.
-    """
-    styles = doc.TextStyles
-    try:
-        st = styles.Item("ConsolasBold")
-        return st
-    except:
-        st = styles.Add("ConsolasBold")
+        # Should not happen on any normal DWG:
+        st = styles.Add("Standard")
         return st
 
 def make_safearray_3d(points):
@@ -211,10 +193,8 @@ def draw_rating_plate_ups(doc, config):
         style_reg = ensure_consolas_style(doc)
         style_bold = ensure_consolas_bold_style(doc)
         style_reg_name = style_reg.Name
-        style_bold_name = style_bold.Name
     except Exception:
         style_reg_name = STYLE_REG
-        style_bold_name = STYLE_BOLD
 
     outer_top = oy + plate_h
     outer_bottom = oy
@@ -294,7 +274,8 @@ def draw_rating_plate_ups(doc, config):
     # Add vertical line separator in PRODUCT row
     add_line(ms, ux1 + param_offset_right - 3, y_bottom, ux1 + param_offset_right - 3, y)
     product_text = config.get('product_text', 'DEFAULT UPS')
-    add_text(ms, 'PRODUCT', ux1 + 3, y - param_offset_top, 4.0, style_name=style_bold_name)
+    add_mtext(ms, r"\fConsolas|b1;" + "PRODUCT", ux1 + 3, y - param_offset_top + 4 , ux2 - (ux1 + param_offset_right) - 4.0 , 4.0, style_name=style_reg_name)
+    
     # Draw product description in bold using font override sequence
     try:
         mtext_w = ux2 - (ux1 + param_offset_right) - 4.0
@@ -370,7 +351,7 @@ def draw_rating_plate_ups(doc, config):
     try:
         add_mtext(ms, r"\fConsolas|b1;LIVELINE ELECTRONICS", ux1 + 3, y_footer_top - 4, 200, 4.2, style_name=style_reg_name)
     except Exception:
-        add_mtext(ms, 'LIVELINE ELECTRONICS', ux1 + 3, y_footer_top - 3, 200, 4.0, style_name=style_bold_name)
+        add_mtext(ms, 'LIVELINE ELECTRONICS', ux1 + 3, y_footer_top - 3, 200, 4.0, style_name=style_reg_name)
     # Address and contact
     addr_y = y_footer_top - 14
     add_text(ms, 'North Ramchandrapur, Narendrapur, Kolkata : 700103, WB', ux1 + 3, addr_y, 2.6, style_name=style_reg_name)
@@ -770,7 +751,10 @@ class UPSRatingPlateGUI(QMainWindow):
 
         try:
             acad = win32com.client.Dispatch('AutoCAD.Application')
-            doc = acad.ActiveDocument
+            acad.Visible = True
+            template_path = os.path.abspath("acadiso.dwt")
+            doc = acad.Documents.Add(template_path)
+            # doc = acad.ActiveDocument
         except Exception as e:
             QMessageBox.critical(self, 'AutoCAD Error', f'Could not access AutoCAD: {e}')
             return

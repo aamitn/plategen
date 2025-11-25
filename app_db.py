@@ -69,25 +69,63 @@ def add_line(ms, x1, y1, x2, y2):
         return None
     return ms.AddLine(make_point_variant(x1, y1), make_point_variant(x2, y2))
 
+def get_consolas_style(doc):
+    """
+    Returns a TextStyle named 'Consolas' if it exists.
+    If not found, attempts to create it, but COM cannot apply font properties.
+    """
+    styles = doc.TextStyles
+    try:
+        return styles.Item("Consolas")
+    except Exception:
+        # Create style if missing (font must be preconfigured in DWG)
+        try:
+            return styles.Add("Consolas")
+        except:
+            return None
+
 
 def add_text(ms, text, x, y, height):
     if win32com is None:
-        # fallback: no-op or could store for preview
         return None
+
     t = ms.AddText(str(text), make_point_variant(x, y), float(height))
+
+    # Assign Consolas style if available
+    try:
+        doc = ms.Parent
+        st = get_consolas_style(doc)
+        if st:
+            t.StyleName = "Consolas"
+    except:
+        pass
+
     return t
 
 
 def add_mtext(ms, text, x, y, width, height):
     if win32com is None:
         return None
+
     mt = ms.AddMText(make_point_variant(x, y), float(width), str(text))
     mt.Height = float(height)
+
     try:
         mt.Attachment = 2
-    except Exception:
+    except:
         pass
+
+    # Apply Consolas
+    try:
+        doc = ms.Parent
+        st = get_consolas_style(doc)
+        if st:
+            mt.StyleName = "Consolas"
+    except:
+        pass
+
     return mt
+
 
 
 def add_dimension_linear(
@@ -209,7 +247,7 @@ def draw_db_plate(doc, config, suppress_zoom=False):
     # INPUT VOLTAGE row
     y_bottom = y - row_h
     add_rect(ms, ux1, y_bottom, ux2, y)
-    add_text(ms, 'INPUT VOLTAGE', ux1 + 2, y - param_offset_top, txt_h)
+    add_text(ms, 'INPUT VOLTAGE', ux1 + 2, y - param_offset_top, txt_h-0.4)
     add_text(ms, config.get('input_voltage', ''), ux1 + param_offset_right, y - param_offset_top, txt_h)
     y = y_bottom
 
@@ -607,7 +645,7 @@ class DBRatingPlateGUI(QMainWindow):
             self.product.setText('DC DISTRIBUTION BOARD')
             # DC: two wires, no phase/frequency
             # Pre-fill with default DC value but allow user edits
-            self.input_voltage.setText('230V DC, 2 WIRES')
+            self.input_voltage.setText('110V DC, 2 WIRES')
             self.input_voltage.setReadOnly(False)
             # disable AC-specific controls
             self.ac_voltage.setEnabled(False)
@@ -720,7 +758,10 @@ class DBRatingPlateGUI(QMainWindow):
             return
         try:
             acad = win32com.client.Dispatch('AutoCAD.Application')
-            doc = acad.ActiveDocument
+            acad.Visible = True
+            template_path = os.path.abspath("acadiso.dwt")
+            doc = acad.Documents.Add(template_path)
+            # doc = acad.ActiveDocument
         except Exception as e:
             QMessageBox.critical(self, 'AutoCAD Error', f'Could not access AutoCAD: {e}')
             return

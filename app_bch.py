@@ -49,30 +49,14 @@ def make_point_variant(x, y, z=0.0):
 # -----------------------------
 def ensure_consolas_style(doc):
     """
-    Returns a text style named 'ConsolasStyle'.
-    NOTE: AutoCAD COM cannot set fonts via Python; style must already exist
-    inside the DWG template if you want correct fonts.
+    DEBUG MODE:
+    Simply return AutoCAD standard style to avoid font issues.
     """
     styles = doc.TextStyles
     try:
-        st = styles.Item("ConsolasStyle")
-        return st
+        return styles.Item("Standard")
     except:
-        st = styles.Add("ConsolasStyle")
-        return st
-
-def ensure_consolas_bold_style(doc):
-    """
-    Returns a bold text style named 'ConsolasBold'.
-    Font must already be bold inside DWG; COM cannot set it.
-    """
-    styles = doc.TextStyles
-    try:
-        st = styles.Item("ConsolasBold")
-        return st
-    except:
-        st = styles.Add("ConsolasBold")
-        return st
+        return styles.Add("Standard")
 
 
 def fetch_latest_github_release(repo):
@@ -145,6 +129,32 @@ def add_text(ms, text, x, y, height, style):
     t = ms.AddText(text, p, float(height))
     t.StyleName = style.Name
     return t
+    
+def add_bold_text(ms, text, x, y, height, width=200):
+    """
+    Adds bold Consolas text using MTEXT formatting.
+    Works even if AutoCAD styles are not bold.
+    """
+    if win32com is None:
+        return None
+    
+    formatted = fr"\fConsolas|b1;{text}"
+    
+    mt = ms.AddMText(
+        make_point_variant(x, y),
+        float(width),
+        formatted
+    )
+    mt.Height = float(height)
+    
+    # Center-left style (optional)
+    try:
+        mt.Attachment = 2
+    except:
+        pass
+    
+    return mt
+
 
 def add_mtext(ms, text, x, y, width, height, style):
     p = make_point_variant(x, y, 0)
@@ -289,7 +299,6 @@ def draw_rating_plate(doc, config, suppress_zoom=False):
     dimension_text_size = config.get('dim_text_size', 5)
 
     style = ensure_consolas_style(doc)
-    bold_style = ensure_consolas_bold_style(doc)
     
     ms = doc.ModelSpace
 
@@ -357,7 +366,7 @@ def draw_rating_plate(doc, config, suppress_zoom=False):
     # PRODUCT row
     y_bottom_product = y - product_h
     add_rect(ms, ux1, y_bottom_product, ux2, y)
-    add_text(ms, "PRODUCT", ux1 + 3, y - 12, 4, bold_style)
+    add_bold_text(ms, "PRODUCT", ux1 + 3, y - 8, 4)
 
     vertical_shift = 3.0
     vx = ux1 + label_w + sep_gap + vertical_shift
@@ -410,8 +419,8 @@ def draw_rating_plate(doc, config, suppress_zoom=False):
         col2_w = (ux2 - col2_x) - 4.0
         col2_center_x = col2_x + (col2_w / 2.0)
 
-        add_text(ms, left_label, col1_center_x + shift_left, y - 6, 3.0, bold_style)
-        add_text(ms, right_label, col2_center_x + shift_left, y - 6, 3.0, bold_style)
+        add_bold_text(ms, left_label, col1_center_x + shift_left, y - 3, 3.0)
+        add_bold_text(ms, right_label, col2_center_x + shift_left, y - 3, 3.0)
 
         y = y_header_bottom
 
@@ -828,8 +837,10 @@ class RatingPlateGUI(QMainWindow):
     def create_product_info(self):
         group = QGroupBox("Product Information")
         layout = QGridLayout()
-        
-        # Battery Voltage
+
+        # ----------------------------------
+        # Row 0: Battery Voltage + Rated Charger Current
+        # ----------------------------------
         layout.addWidget(QLabel("Battery Voltage (V):"), 0, 0)
         self.battery_voltage = QDoubleSpinBox()
         self.battery_voltage.setRange(0, 999)
@@ -837,17 +848,19 @@ class RatingPlateGUI(QMainWindow):
         self.battery_voltage.setSuffix(" V")
         self.battery_voltage.valueChanged.connect(self.update_product_description)
         layout.addWidget(self.battery_voltage, 0, 1)
-        
-        # Battery Capacity
-        layout.addWidget(QLabel("Battery Capacity (Ah):"), 0, 2)
-        self.battery_capacity = QSpinBox()
-        self.battery_capacity.setRange(1, 9999)
-        self.battery_capacity.setValue(500)
-        self.battery_capacity.setSuffix(" Ah")
-        self.battery_capacity.valueChanged.connect(self.update_product_description)
-        layout.addWidget(self.battery_capacity, 0, 3)
-        
-        # Battery Type
+
+        layout.addWidget(QLabel("Rated Charger Current (A):"), 0, 2)
+        self.rated_charger_current = QDoubleSpinBox()
+        self.rated_charger_current.setRange(1, 2000)
+        self.rated_charger_current.setValue(100)
+        self.rated_charger_current.setSuffix(" A")
+        self.rated_charger_current.valueChanged.connect(self.update_product_description)
+        self.rated_charger_current.valueChanged.connect(self.apply_default_float_currents)
+        layout.addWidget(self.rated_charger_current, 0, 3)
+
+        # ----------------------------------
+        # Row 1: Battery Type + Battery Capacity
+        # ----------------------------------
         layout.addWidget(QLabel("Battery Type:"), 1, 0)
         self.battery_type = QComboBox()
         self.battery_type.addItems([
@@ -861,10 +874,21 @@ class RatingPlateGUI(QMainWindow):
             "Ni-Cd BATTERY"
         ])
         self.battery_type.currentTextChanged.connect(self.update_product_description)
-        layout.addWidget(self.battery_type, 1, 1, 1, 3)
-        
-        # Generated Product Description (Read-only display)
+        layout.addWidget(self.battery_type, 1, 1)
+
+        layout.addWidget(QLabel("Battery Capacity (Ah):"), 1, 2)
+        self.battery_capacity = QSpinBox()
+        self.battery_capacity.setRange(1, 9999)
+        self.battery_capacity.setValue(500)
+        self.battery_capacity.setSuffix(" Ah")
+        self.battery_capacity.valueChanged.connect(self.update_product_description)
+        layout.addWidget(self.battery_capacity, 1, 3)
+
+        # ----------------------------------
+        # Row 2: Generated Description
+        # ----------------------------------
         layout.addWidget(QLabel("Generated Description:"), 2, 0, 1, 4)
+
         self.product_desc = QLineEdit()
         self.product_desc.setReadOnly(True)
         self.product_desc.setStyleSheet("""
@@ -877,7 +901,9 @@ class RatingPlateGUI(QMainWindow):
         """)
         layout.addWidget(self.product_desc, 3, 0, 1, 4)
 
-        # Product font height control (allows adjusting product MText size)
+        # ----------------------------------
+        # Row 3: Product Font Height
+        # ----------------------------------
         layout.addWidget(QLabel("Product Font Height:"), 4, 0)
         self.product_font_h = QDoubleSpinBox()
         self.product_font_h.setRange(0.5, 20.0)
@@ -886,67 +912,48 @@ class RatingPlateGUI(QMainWindow):
         self.product_font_h.setSuffix(" mm")
         self.product_font_h.valueChanged.connect(self.update_product_description)
         layout.addWidget(self.product_font_h, 4, 1)
-        
+
         group.setLayout(layout)
-        
-        # Initialize product description
+
+        # Init
         self.update_product_description()
-        
+
         return group
-    
-    def get_charger_current(self):
-        """Get the maximum charger current based on mode and input values"""
+
+    def apply_default_float_currents(self):
+        """Set default float current placeholders based on rated charger current"""
+        rated = self.rated_charger_current.value()
+
         mode = self.mode_combo.currentText()
-        
-        try:
-            if mode == "Single":
-                # Get max of float or boost current
-                float_curr = getattr(self, 'float_current', None)
-                boost_curr = getattr(self, 'boost_current', None)
-                if float_curr and boost_curr:
-                    return max(float_curr.value(), boost_curr.value())
-                return 100.0  # Default
-                
-            elif mode == "Dual":
-                # Sum of both chargers (max of float/boost for each)
-                ch1_float = getattr(self, 'ch1_float_current', None)
-                ch1_boost = getattr(self, 'ch1_boost_current', None)
-                ch2_float = getattr(self, 'ch2_float_current', None)
-                ch2_boost = getattr(self, 'ch2_boost_current', None)
-                
-                if all([ch1_float, ch1_boost, ch2_float, ch2_boost]):
-                    ch1_max = max(ch1_float.value(), ch1_boost.value())
-                    ch2_max = max(ch2_float.value(), ch2_boost.value())
-                    return ch1_max + ch2_max
-                return 100.0
-                
-            elif mode == "FFCB":
-                # Sum of float charger and FCB charger (max of float/boost)
-                float_curr = getattr(self, 'float_charger_current', None)
-                fcb_float = getattr(self, 'fcb_float_current', None)
-                fcb_boost = getattr(self, 'fcb_boost_current', None)
-                
-                if all([float_curr, fcb_float, fcb_boost]):
-                    fcb_max = max(fcb_float.value(), fcb_boost.value())
-                    return float_curr.value() + fcb_max
-                return 100.0
-                
-            elif mode == "Dual Start-Finish":
-                # Sum of both chargers (max of float or boost start for each)
-                ch1_float = getattr(self, 'ch1_float_current_sf', None)
-                ch1_start = getattr(self, 'ch1_boost_start', None)
-                ch2_float = getattr(self, 'ch2_float_current_sf', None)
-                ch2_start = getattr(self, 'ch2_boost_start', None)
-                
-                if all([ch1_float, ch1_start, ch2_float, ch2_start]):
-                    ch1_max = max(ch1_float.value(), ch1_start.value())
-                    ch2_max = max(ch2_float.value(), ch2_start.value())
-                    return ch1_max + ch2_max
-                return 100.0
-        except:
-            return 100.0  # Default fallback
-        
-        return 100.0
+
+        # SINGLE
+        if mode == "Single":
+            if hasattr(self, "float_current"):
+                self.float_current.setValue(rated)
+
+        # DUAL
+        elif mode == "Dual":
+            if hasattr(self, "ch1_float_current"):
+                self.ch1_float_current.setValue(rated)
+            if hasattr(self, "ch2_float_current"):
+                self.ch2_float_current.setValue(rated)
+
+        # FFCB
+        elif mode == "FFCB":
+            if hasattr(self, "float_charger_current"):
+                self.float_charger_current.setValue(rated)
+            if hasattr(self, "fcb_float_current"):
+                self.fcb_float_current.setValue(rated)
+
+        # DUAL START-FINISH
+        elif mode == "Dual Start-Finish":
+            if hasattr(self, "ch1_float_current_sf"):
+                self.ch1_float_current_sf.setValue(rated)
+            if hasattr(self, "ch2_float_current_sf"):
+                self.ch2_float_current_sf.setValue(rated)
+
+        self.update_product_description()
+
     
     def update_product_description(self):
         """Dynamically generate product description based on inputs"""
@@ -956,8 +963,9 @@ class RatingPlateGUI(QMainWindow):
         battery_type = self.battery_type.currentText()
         
         # Get charger current
-        charger_current = self.get_charger_current()
-        
+        # charger_current = self.get_charger_current()
+        charger_current = self.rated_charger_current.value()
+
         # Determine charger type description
         mode_descriptions = {
             "Single": "FLOAT CUM BOOST",
@@ -969,8 +977,9 @@ class RatingPlateGUI(QMainWindow):
         charger_type = mode_descriptions.get(mode, "FLOAT CUM BOOST")
         
         # Build description
+        # description = f"{int(battery_v)}V {int(charger_current)}A {charger_type} BATTERY CHARGER FOR {battery_cap}AH {battery_type}"
         description = f"{int(battery_v)}V {int(charger_current)}A {charger_type} BATTERY CHARGER FOR {battery_cap}AH {battery_type}"
-        
+
         self.product_desc.setText(description)
     
     def create_input_voltage(self):
@@ -1263,8 +1272,9 @@ class RatingPlateGUI(QMainWindow):
         elif mode == "Dual Start-Finish":
             self.create_dual_sf_mode_fields()
         
-        # Update product description when mode changes
+        # Update product description and placeholder float currents when mode changes
         self.update_product_description()
+        self.apply_default_float_currents()
     
     def create_single_mode_fields(self):
         self.voltage_layout.addWidget(QLabel("Float Voltage (V):"), 0, 0)
@@ -1613,7 +1623,11 @@ class RatingPlateGUI(QMainWindow):
             while attempts < 8:
                 attempts += 1
                 try:
-                    doc = acad.ActiveDocument
+                    acad = win32com.client.Dispatch('AutoCAD.Application')
+                    acad.Visible = True
+                    template_path = os.path.abspath("acadiso.dwt")
+                    doc = acad.Documents.Add(template_path)
+                    # doc = acad.ActiveDocument
                     break
                 except Exception as e:
                     # COM call rejected may return HRESULT -2147418111; wait and retry
