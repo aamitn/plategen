@@ -580,7 +580,7 @@ class LauncherWindow(QMainWindow):
         Start AutoCAD by best-effort strategies:
         - try exe names in PATH
         - try Dispatch()ing known ProgIDs (which can start COM server)
-        - search common Program Files\Autodesk folders for executables and launch
+        - search common Program Files/Autodesk folders for executables and launch
         If wait==True, poll until COM becomes available (or timeout). When COM appears,
         force Visible=True and maximize the window (WindowState=3).
         Returns True on successful start/detection, False otherwise.
