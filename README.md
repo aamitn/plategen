@@ -46,7 +46,7 @@ Managed via `requirements.txt`:
 ### Installation & Execution
 ```bash
 # Clone the repository
-git clone https://github.com/your-repo/plategen.git
+git clone https://github.com/aamitn/plategen.git
 cd plategen
 
 # Install dependencies
