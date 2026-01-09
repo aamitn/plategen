@@ -715,8 +715,7 @@ class DBRatingPlateGUI(QMainWindow):
         cfg['incomer'] = self.incomer.text()
         year = int(self.year.value()) if hasattr(self, 'year') else datetime.now().year
         cfg['year'] = year
-        yy1 = year % 100
-        yy2 = (year + 1) % 100
+        yy1, yy2 = self.compute_fiscal_yy(year)
         proj = int(self.project_no.value()) if hasattr(self, 'project_no') else 0
         op = int(self.order_no.value()) if hasattr(self, 'order_no') else 0
         dtype = self.db_type.currentText() if hasattr(self, 'db_type') else 'ACDB'
@@ -744,6 +743,24 @@ class DBRatingPlateGUI(QMainWindow):
         cfg['override_height'] = self.override_h.text().strip()
         return cfg
 
+    def compute_fiscal_yy(self, year, ref_date=None):
+        """Compute two-digit fiscal year start and end for the given year based on a reference date (default: today).
+
+        Assumes fiscal year runs from April (4) to March (3). If the reference month is April or later,
+        the fiscal year that includes the given calendar "year" starts in that year (e.g., Apr 2026 -> FY 26-27).
+        For Jan-Mar, the fiscal year that contains the given year started in the previous calendar year
+        (e.g., Feb 2026 -> FY 25-26).
+        """
+        if ref_date is None:
+            ref_date = datetime.now()
+        if ref_date.month >= 4:
+            start = year
+            end = year + 1
+        else:
+            start = year - 1
+            end = year
+        return start % 100, end % 100
+    
     def generate_plate(self):
         cfg = self.get_config()
         if win32com is None:

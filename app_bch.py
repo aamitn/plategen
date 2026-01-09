@@ -59,6 +59,25 @@ def ensure_consolas_style(doc):
         return styles.Add("Standard")
 
 
+def compute_fiscal_yy(year, ref_date=None):
+    """Compute two-digit fiscal year start and end for the given year.
+
+    Fiscal year is assumed Apr (4) - Mar (3). If the reference month is April or later,
+    the fiscal year that includes the calendar `year` starts in that year (e.g., Apr 2026 -> FY 26-27).
+    For Jan-Mar, the fiscal year that contains the given year started in the previous calendar year
+    (e.g., Feb 2026 -> FY 25-26).
+    """
+    if ref_date is None:
+        ref_date = datetime.now()
+    if ref_date.month >= 4:
+        start = year
+        end = year + 1
+    else:
+        start = year - 1
+        end = year
+    return start % 100, end % 100
+
+
 def fetch_latest_github_release(repo):
     """Return latest release tag for a given GitHub repo 'owner/repo'."""
     if not repo or '/' not in repo:
@@ -569,10 +588,9 @@ def draw_rating_plate(doc, config, suppress_zoom=False):
     v2 = make_safearray_3d([(v2_x, three_top, 0),(v2_x, three_bottom, 0)])
     ms.AddPolyline(v2)
 
-    # Get current year and FY range
+    # Get current year and FY range (fiscal year Apr–Mar)
     year = config.get('year', datetime.now().year)
-    yy1 = year % 100
-    yy2 = (year + 1) % 100
+    yy1, yy2 = compute_fiscal_yy(year)
     fy_range = f"{yy1:02d}-{yy2:02d}"
 
     # SL NO

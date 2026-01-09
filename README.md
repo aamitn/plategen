@@ -44,18 +44,36 @@ Managed via `requirements.txt`:
 - `psutil` (AutoCAD process management)
 
 ### Installation & Execution
+
 ```bash
 # Clone the repository
 git clone https://github.com/aamitn/plategen.git
 cd plategen
+
+# Create and activate venv
+python -m venv .venv
+
+# Activate venv
+.\.venv\Scripts\activate.bat 
 
 # Install dependencies
 pip install -r requirements.txt
 
 # Run the Launcher
 python app.py
+python app_xx.py
 ```
 
+## Auto Build Script
+```bash
+# Clean 
+./clean.ps1 
+(from powershell)
+
+# Build
+./build.ps1
+(create + activate venv + install dependencies + generate pyinstaller .exe + generate inno setup installer )
+```
 ---
 
 ##  Application Architecture
@@ -216,5 +234,5 @@ Text must use predefined AutoCAD styles (`STYLE_REG`, `STYLE_BOLD`) in the drawi
 
 ##  License
 
-MIT License © [Bitmutex Technologies / Liveline Eletronics]
+MIT License © [Bitmutex Technologies](https://www.bitmutex.com)
 

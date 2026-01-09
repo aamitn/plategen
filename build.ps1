@@ -83,26 +83,63 @@ Write-Host Resources copied successfully into dist folder.
 # -------------------------------------------------------------
 # Build installer with Inno Setup
 # -------------------------------------------------------------
-Write-Host Building installer with Inno Setup...
+Write-Host "Building installer with Inno Setup..."
 
-$ISS_PATH = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+function Find-ISCC {
 
-if (!(Test-Path $ISS_PATH)) {
-    Write-Host ERROR ISCC.exe NOT FOUND at
-    Write-Host   $ISS_PATH
-    Write-Host Install from httpsjrsoftware.orgisdl.php
+    # 1. Try from PATH
+    $cmd = Get-Command ISCC.exe -ErrorAction SilentlyContinue
+    if ($cmd) {
+        return $cmd.Source
+    }
+
+    # 2. Build candidate paths on all drives
+    $drives = Get-PSDrive -PSProvider FileSystem | Select-Object -ExpandProperty Root
+
+    $relativePaths = @(
+        "Program Files (x86)\Inno Setup 6\ISCC.exe",
+        "Program Files\Inno Setup 6\ISCC.exe"
+    )
+
+    foreach ($drive in $drives) {
+        foreach ($rel in $relativePaths) {
+            $full = Join-Path $drive $rel
+            if (Test-Path $full) {
+                return $full
+            }
+        }
+    }
+
+    return $null
+}
+
+$ISS_PATH = Find-ISCC
+
+if (-not $ISS_PATH) {
+    Write-Host "ERROR: ISCC.exe NOT FOUND on this system."
+    Write-Host "Please install Inno Setup from: https://jrsoftware.org/isdl.php"
     exit 1
 }
 
-Write-Host Using Inno Setup at
-Write-Host   $ISS_PATH
+Write-Host "Using Inno Setup at:"
+Write-Host "  $ISS_PATH"
 
-& $ISS_PATH installeriscript.iss
+$issFile = Join-Path $PSScriptRoot "installer\iscript.iss"
+
+if (-not (Test-Path $issFile)) {
+    Write-Host "ERROR: Installer script not found at:"
+    Write-Host "  $issFile"
+    exit 1
+}
+
+& "$ISS_PATH" "$issFile"
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host Installer build FAILED!
+    Write-Host "Installer build FAILED!"
     exit 1
 }
+
+Write-Host "Installer build SUCCESSFUL ✔"
 
 Write-Host 
 Write-Host =======================================

@@ -714,10 +714,27 @@ class UPSRatingPlateGUI(QMainWindow):
             cfg['dim_height_override'] = ''
         year = int(self.year.value())
         cfg['year'] = year
-        yy1 = year % 100
-        yy2 = (year + 1) % 100
+        yy1, yy2 = self.compute_fiscal_yy(year)
         cfg['serial'] = f"LL/{yy1:02d}-{yy2:02d}/{self.project_no.value()}-OP{self.order_no.value()}/{self.sn_suffix.text()}"
         return cfg
+
+    def compute_fiscal_yy(self, year, ref_date=None):
+        """Compute two-digit fiscal year start and end for the given year based on a reference date (default: today).
+
+        Assumes fiscal year runs from April (4) to March (3). If the reference month is April or later,
+        the fiscal year that includes the given calendar "year" starts in that year (e.g., Apr 2026 -> FY 26-27).
+        For Jan-Mar, the fiscal year that contains the given year started in the previous calendar year
+        (e.g., Feb 2026 -> FY 25-26).
+        """
+        if ref_date is None:
+            ref_date = datetime.now()
+        if ref_date.month >= 4:
+            start = year
+            end = year + 1
+        else:
+            start = year - 1
+            end = year
+        return start % 100, end % 100
 
     def generate_plate(self):
         base_cfg = self.get_config()
@@ -730,8 +747,7 @@ class UPSRatingPlateGUI(QMainWindow):
         for i in range(1, unit_count + 1):
             cfg = dict(base_cfg)
             cfg['product_text'] = f"{kva:g}kVA UPS-{i} PANEL"
-            yy1 = cfg['year'] % 100
-            yy2 = (cfg['year'] + 1) % 100
+            yy1, yy2 = self.compute_fiscal_yy(cfg['year'])
             cfg['serial'] = f"LL/{yy1:02d}-{yy2:02d}/{self.project_no.value()}-OP{self.order_no.value()}/UPS{i}"
             to_generate.append(cfg)
 
@@ -739,8 +755,7 @@ class UPSRatingPlateGUI(QMainWindow):
         if unit_count > 1:
             cfg = dict(base_cfg)
             cfg['product_text'] = f"{kva:g}kVA BYPASS PANEL"
-            yy1 = cfg['year'] % 100
-            yy2 = (cfg['year'] + 1) % 100
+            yy1, yy2 = self.compute_fiscal_yy(cfg['year'])
             cfg['serial'] = f"LL/{yy1:02d}-{yy2:02d}/{self.project_no.value()}-OP{self.order_no.value()}/BYP"
             to_generate.append(cfg)
 

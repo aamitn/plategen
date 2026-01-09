@@ -31,6 +31,12 @@ $FoldersToPurge = @("build", "dist", "node_modules")
 # Define the file patterns to be purged (e.g., test files)
 $FilesToPurge = @("*.spec")
 
+# Define installer output directory (special case)
+$InstallerOutputPath = Join-Path $PSScriptRoot "installer\output"
+
+# Define installer output directory (special case)
+$InstallerOutputPath = Join-Path $PSScriptRoot "installer\output"
+
 Write-Host "--- Starting project cleanup ---"
 
 try {
@@ -58,8 +64,20 @@ try {
     # --- 1. CLEAN UP DIRECTORIES ---
     Write-Host "--- Cleaning up directories ---" -ForegroundColor Green
 
-    # Get-ChildItem finds all matching directories recursively.
-    $DirsToDelete = Get-ChildItem -Path (Get-Location) -Recurse -Directory -Include $FoldersToPurge -ErrorAction SilentlyContinue
+    # Exclude common virtualenv and VCS folders to avoid deleting internal files (e.g., .venv, venv)
+    $ExcludeDirs = @(".venv", "venv", "env", ".git", ".hg")
+    $excludePattern = ($ExcludeDirs | ForEach-Object { [regex]::Escape($_) }) -join "|"
+
+    # Get-ChildItem finds all matching directories recursively, then exclude any located under excluded paths.
+    $DirsToDelete = Get-ChildItem -Path (Get-Location) -Recurse -Directory -Include $FoldersToPurge -ErrorAction SilentlyContinue |
+        Where-Object { -not ($_.FullName -match "[\\\/]($excludePattern)[\\\/]") }
+
+    # Report number of directories skipped due to exclusion for transparency
+    $SkippedDirs = (Get-ChildItem -Path (Get-Location) -Recurse -Directory -Include $FoldersToPurge -ErrorAction SilentlyContinue | Where-Object { ($_.FullName -match "[\\\/]($excludePattern)[\\\/]") })
+    if ($SkippedDirs) {
+        Write-Host "Skipped $($SkippedDirs.Count) directories that were inside excluded paths (e.g. .venv):" -ForegroundColor DarkYellow
+        $SkippedDirs | ForEach-Object { Write-Host "  (skipped) $($_.FullName)" -ForegroundColor DarkYellow }
+    }
 
     if ($DirsToDelete) {
         $DirCount = $DirsToDelete.Count
@@ -94,6 +112,18 @@ try {
     } else {
         Write-Host "No files matching '*.spec' found."
     }
+
+	# --- 2.5 CLEAN UP INSTALLER OUTPUT FOLDER ---
+	Write-Host ""
+	Write-Host "--- Cleaning up installer output folder ---" -ForegroundColor Green
+
+	if (Test-Path $InstallerOutputPath) {
+		Write-Host "Deleting installer output folder: $InstallerOutputPath" -ForegroundColor Yellow
+		Remove-Item -Path $InstallerOutputPath -Recurse -Force -WhatIf:$WhatIf
+		$DirCount++
+	} else {
+		Write-Host "Installer output folder not found. Skipping."
+	}
 
     # --- 3. FINAL REPORT ---
     $TotalCount = $DirCount + $FileCount
